@@ -21,5 +21,5 @@ Data files provided on GitHub
 * DilutionExperiment_TSQdata.csv - the results from the targeted mass spectrometry data in a format that can be read into R for the WGCNA analysis.
 
 References cited
-Kido Soule, M. C., Longnecker, K., Johnson, W. M., & Kujawinski, E. B. (2015). Environmental metabolomics: analytical strategies. Marine Chemistry, 177, Part 2, 374-387. doi: doi:10.1016/j.marchem.2015.06.029
-Langfelder, P., & Horvath, S. (2008). WGCNA: an R package for weighted correlation network analysis. BMC Bioinformatics, 9(1), 559. 
+* Kido Soule, M. C., Longnecker, K., Johnson, W. M., & Kujawinski, E. B. (2015). Environmental metabolomics: analytical strategies. Marine Chemistry, 177, Part 2, 374-387. doi: doi:10.1016/j.marchem.2015.06.029
+* Langfelder, P., & Horvath, S. (2008). WGCNA: an R package for weighted correlation network analysis. BMC Bioinformatics, 9(1), 559. 
