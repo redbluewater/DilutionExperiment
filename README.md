@@ -5,7 +5,7 @@ Krista Longnecker, klongnecker@whoi.edu
 
 Analysis steps
 * Run the dilution experiment (at sea)
-* Store filters with intracellular metabolites at -80C until extraction can occur in a land-based laboratory
+* Store filters with intracellular metabolites at -80 degrees Celsius until extraction can occur in a land-based laboratory
 * Extract the intracellular metabolites using the methods described in Kido Soule et al. (2015)
 * Analyze the extracts using (1) targeted mass spectrometry and (2) untargeted mass spectrometry methods, both as described in Kido Soule et al. (2015)
 * Process the targeted mass spectrometry data to obtain concentrations of known organic compounds within the samples
