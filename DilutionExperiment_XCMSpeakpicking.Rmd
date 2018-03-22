@@ -1,0 +1,200 @@
+Processing the Dilution Experiment samples. More robust peak shape requirements
+FT-LC data, negative ion mode, intracellular metabolites only. 
+Use this file and parameters to convert mzML data into a list of features from the 
+untargeted metabolomics data.
+Krista Longnecker
+Woods Hole Oceanographic Institution
+July 29, 2015; April 20, 2016; May 20, 2016
+========================================================
+
+Go ahead and load up some of the parameters:
+```{r Settings, eval=TRUE}
+library(xcms)
+library(CAMERA)
+library(XLConnect)
+
+```
+
+
+Now go ahead and do the peak picking, or load in the existing file...peak picking can be time consuming and it easier to only do that once
+
+```{r GettingData, eval = TRUE}
+
+##Note: in negative ion mode, I set a threshold for peaks in MSconvert before I even get to this step. This massively improves the peak picking in XCMS
+#data are LC data from a 7T FT-ICR-MS instrument. LC parameters given in Kido Soule et al. (2015, Marine Chemistry)
+usePath <- "C:/pathToData/FTLCdata/mzML_threshold1000/neg"
+
+ext <- ".mzML"
+pre <- paste0(usePath,"/")
+
+mzdatafiles <- list.files(usePath,recursive = FALSE, full.names=TRUE,
+                          pattern = paste0("\\",ext))
+
+## How many CPU cores has your machine (or cluster) ?
+nSlaves=4
+
+#For negative ion mode: ppm = 2,3 seems best
+xs<-xcmsSet(mzdatafiles, method = "centWave",ppm = 2 ,snthresh = 10,
+  prefilter = c(3,500), mzCenterFun = "wMean",integrate = 2, 
+  verbose.columns = TRUE, peakwidth=c(20,80), fitgauss= TRUE, noise = 500, 
+  mzdiff=-0.005,nSlaves=nSlaves)
+
+```
+
+
+```{r settingFileNames}
+# #setup the filenames all in one place bc easier...
+#put this here bc if we load in data already with peak picking...that will bring in a NameOfFile
+
+nDate <- "2016.05.20_v1"
+nBase <- "DilExp_neg_Omni"
+fName_allPeaks <- paste0(nBase,'_listAllPeaks.',nDate,'.csv')
+fName_aligned <- paste0(nBase,'_aligned.',nDate,'.csv')
+fName_peaksPicked <- paste0(nBase, '_picked.',nDate, '.pdf')
+NameOfFile <- paste0(nBase,"_",nDate,".Rimage")
+rm(nDate,nBase)
+
+```
+
+
+
+```{r apply_peakShape, eval=TRUE}
+# # #####the peakShape code seems to be from Tony Larson...via the Google Groups forum  
+source("peakShape.r")  
+
+if(1){
+  #run peak shape...
+  xs2 <- peakShape(xs,cor.val=0.95)
+  } else {
+    #don't bother
+    xs2<-xs
+}
+
+
+```
+
+
+Setup the ability to rename the classes based on information in the CSV file
+
+```{r getSampleInformation, eval=TRUE}
+# use this to match the files with the information about the samples
+wDir <-  "pathToFiles/sequenceFiles/"
+all <- readWorksheetFromFile(paste0(wDir,"DilutionExperiment_FTLCsequenceInformation.xlsx"),sheet = 1)
+putDataHere <-data.frame()
+
+for(i in 1:length(all$File.Name)) {
+  h <- all$File.Name[i]
+  #paste0 will strip out the spaces; make the full filename here    
+  h <-paste0(pre,h,ext)
+  
+  #this will pick up the right row in mzdatafiles
+  m <- match(basename(h),basename(xs2@filepaths))
+  if (!is.na(m)) {
+    tData <- all[i,]
+    if (nrow(putDataHere)==0) {
+      putDataHere <- tData
+      } else {
+    putDataHere[m,] <-tData
+    }
+    rm(tData)
+  }   
+  rm(h,m)
+}   
+
+rm(all) #house cleaning...
+
+# rm(classlist) 
+classlist <- matrix()
+#this next bit is a hack, but it works in the context of xcms
+for (i in 1:nrow(putDataHere)) {
+  classlist[i] <- paste0(putDataHere$ionMode[i], ".", putDataHere$GoodData[i],'.', 
+                         putDataHere$SampleType[i])
+}
+rm(i)
+
+
+```
+
+
+```{r DoGrouping_1, eval=TRUE}
+     
+##now I will need to consider the groups. First 'group' is actually the ionization mode
+#for simplicity, start by using split to get the files from one ionization mode  
+useXS <- xs2
+
+#define the classes after the peak picking...
+sampclass(useXS) <- classlist 
+
+#note this will select files in negative ion mode that are marked with '1' in the GoodData column
+xsOne <- split(useXS,classlist)[["negative.1.Omni"]]
+putDataHere.1 <- split(putDataHere,classlist)[["negative.1.Omni"]]
+nSamples<-length(xsOne@filepaths)
+
+classlist.1 <- matrix()
+#this next bit is a hack, but it works in the context of xcms
+for (i in 1:nrow(putDataHere.1)) {
+  classlist.1[i] <-paste0(putDataHere.1$ionMode[i],".",putDataHere.1$GoodData[i],".",
+                        putDataHere.1$SampleType[i])
+}
+
+#set the groups to the QC/blank/samples before grouping:
+sampclass(xsOne) <-classlist.1
+
+##do this two ways...with pre-grouping
+xgN3 <-group.density(xsOne,minfrac=0,minsamp=1,bw=22,mzwid=0.015)     
+
+#set the center sample so it doesn't pick the wacky 1 um sample...
+rc.obi <-retcor.obiwarp(xgN3,plottype="deviation",profStep = 0.1,distFunc = "cor", 
+                         gapInit = 0.4,gapExtend=0.4,response = 1,center = 5)    
+
+xgN3 <-group.density(rc.obi,minfrac=0,minsamp=1,bw=20,mzwid=0.001)     
+xgF <- fillPeaks(xgN3, method = "chrom")                              
+
+```
+
+Go ahead and spit out some variables to the folder
+
+```{r SaveData, eval = FALSE}
+
+#this will spit out the list of all features identified
+write.csv(xgF@peaks,file = fName_allPeaks)
+
+```
+
+These are the pieces for CAMERA
+      
+```{r CAMERA, eval = TRUE}
+#
+#nSamples <- length(mzdatafiles)
+xsa<-xsAnnotate(xgF)
+
+#group the features initially just by retention time
+xsaF <-groupFWHM(xsa)
+
+#figure out which features also have a matching 13C feature. Have to enter both 
+#the relative error (ppm) and the absolute error (mzabs)
+xsaFI <-findIsotopes(xsaF,ppm=1.5,mzabs = 0.0001,minfrac = 1/nSamples)
+
+#now group by the correlations based on (1) intensity, (2) EIC, (3) isotopes...
+xsaC <-groupCorr(xsaFI,cor_eic_th=0.75,pval=0.05, graphMethod="hcs",
+ calcIso = TRUE, calcCiS = TRUE, calcCaS = FALSE)
+
+#setup the file to also look for adducts, only go with the primary adducts for the moment
+file <-system.file("rules/primary_adducts_neg.csv",package = "CAMERA")
+rules <-read.csv(file)
+an <-findAdducts(xsaC,polarity = "negative",rules=rules,ppm=1.5)
+
+#do some housecleaning
+rm(xsa,xsaF,xsaFI,xsaC)
+```
+
+
+And save the final steps
+
+```{r lastSave, eval =TRUE}
+#export the data to the CSV file
+write.csv(getPeaklist(an),file=fName_aligned) 
+save.image(NameOfFile)
+
+```
+
