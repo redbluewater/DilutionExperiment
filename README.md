@@ -1,10 +1,5 @@
-# Dilution Experiment
-This GitHub repository holds the R code used for peak picking and WGCNA analysis used during the 'dilution experiment' conducted during the DeepDOM cruise in April/May 2013. These files provide details on (1) the peak picking parameters used in XCMS to convert from mzML files into a set of aligned features, and (2) the options selected for the WGCNA analysis that linked the FT-MS data and the TSQ data.
-The raw data and experimental metadata are available from MetaboLights: http://www.ebi.ac.uk/metabolights/MTBLS461
-Krista Longnecker, klongnecker@whoi.edu
-=======
 # DilutionExperiment
-This GitHub repository holds the R code for analysis of data from the 'dilution experiment' that was conducted during the DeepDOM cruise in April/May 2013. 
+This GitHub repository holds the R code for analysis of data from the 'dilution experiment' that was conducted during the DeepDOM cruise in April/May 2013. The raw data and experimental metadata are available from MetaboLights: http://www.ebi.ac.uk/metabolights/MTBLS461 
 These files provide details on (1) the peak picking parameters used in XCMS to convert from mzML files into a set of aligned features, and (2) the options selected for the WGCNA analysis that linked the FT-MS data and the TSQ data. WGCNA (Weighted Correlation Network Analysis) is an R package that seeks to find paramters that co-vary and thus may be regulated by similar factors (Langfelder and Horvath, 2008). In this project, we used WGCNA to link untargeted and targeted mass spectrometry data from intracellular organic matter extracted from seawater.
 
 The raw data and experimental metadata are available from MetaboLights: http://www.ebi.ac.uk/metabolights/MTBLS461
