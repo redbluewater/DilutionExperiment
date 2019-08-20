@@ -25,10 +25,11 @@ disableWGCNAThreads() #this is needed to use this code in RStudio
 ```
 
 ```{r FileNames, eval = TRUE}
+#setup file names ahead of time, will be used to save and export data
 
-NameOfFile = 'DilExp_WGCNA_negOmni_log2.2016.05.27_v1.Rimage'
-WriteCSVname = 'DilExp_WGCNA_negOmni_log2.2016.05.27_v1.csv'
-writeColorsName = 'DilExp_WGCNA_tableColors_log2.2016.05.27_v1.csv'
+NameOfFile = 'DilExp_WGCNA_negOmni_log2.Rimage'
+WriteCSVname = 'DilExp_WGCNA_negOmni_log2.csv'
+writeColorsName = 'DilExp_WGCNA_tableColors_log2.csv'
 
 ```
 
@@ -356,8 +357,6 @@ dim(textMatrix) = dim(moduleTraitCor)
 
 windows(15,10) #this will make the figure window appear outside the bounds of the RStudio stuff (and hence be easier to edit)
 par(mar = c(15,9,2,3))
-#par(mai = c(2,2,1,1))
-# par(mar = c(6,5,4,2) +0.1) #this is closer to the default values
 labeledHeatmap(Matrix = moduleTraitCor,xLabels = names(datTraits),yLabels=names(MEs),
   ySymbols = names(MEs),colorLabels = FALSE, colors = blueWhiteRed(50),
   textMatrix =  textMatrix,xLabelsAngle=45,
@@ -367,8 +366,7 @@ labeledHeatmap(Matrix = moduleTraitCor,xLabels = names(datTraits),yLabels=names(
 
 ```{r getSignificant, eval = TRUE}
 
-#complete hack, but might be easier than squinting at the labeled heatmap
-# showR <- rbind(moduleTraitCor[,'arginine'],moduleTraitPvalue[,'arginine'])
+#show me the list of compounds that are significantly correlated to a color module
 
 #convert to a dataframe in order to retain the row name information
 fC = 'MEmidnightblue'

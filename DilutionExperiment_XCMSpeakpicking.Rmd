@@ -2,6 +2,7 @@ Processing the Dilution Experiment samples. More robust peak shape requirements
 FT-LC data, negative ion mode, intracellular metabolites only. 
 Use this file and parameters to convert mzML data into a list of features from the 
 untargeted metabolomics data.
+This version requires XCMS version 1.52.0
 Krista Longnecker
 Woods Hole Oceanographic Institution
 July 29, 2015; April 20, 2016; May 20, 2016
@@ -16,7 +17,7 @@ library(XLConnect)
 ```
 
 
-Now go ahead and do the peak picking, or load in the existing file...peak picking can be time consuming and it easier to only do that once
+Go ahead and do the peak picking, or load in the existing file. Peak picking can be time consuming and it is easier to only do that once
 
 ```{r GettingData, eval = TRUE}
 
@@ -74,43 +75,44 @@ if(1){
 ```
 
 
-Setup the ability to rename the classes based on information in the CSV file
+Setup the ability to rename the classes based on information in the annotated sequence file (now in xlsx format)
 
 ```{r getSampleInformation, eval=TRUE}
 # use this to match the files with the information about the samples
 wDir <-  "pathToFiles/sequenceFiles/"
-all <- readWorksheetFromFile(paste0(wDir,"DilutionExperiment_FTLCsequenceInformation.xlsx"),sheet = 1)
-putDataHere <-data.frame()
+exFile <- readWorksheetFromFile(paste0(wDir,"DilutionExperiment_FTLCsequenceInformation.xlsx"),sheet = 1)
 
-for(i in 1:length(all$File.Name)) {
-  h <- all$File.Name[i]
+#set up the column names using column names from exFile
+nv = ncol(exFile)
+putDataHere <- data.frame(matrix(NA,nrow = 1,ncol = nv))
+colnames(putDataHere) <- colnames(exFile)
+rm(nv)
+
+for(i in 1:length(exFile$File.Name)) {
+  h <- exFile$File.Name[i]
   #paste0 will strip out the spaces; make the full filename here    
   h <-paste0(pre,h,ext)
   
   #this will pick up the right row in mzdatafiles
   m <- match(basename(h),basename(xs2@filepaths))
   if (!is.na(m)) {
-    tData <- all[i,]
-    if (nrow(putDataHere)==0) {
-      putDataHere <- tData
-      } else {
+    tData <- exFile[i,]
+    #changed 8/13/2019, the earlier version assumed that the first match will be the first row and that               #can be wrong
     putDataHere[m,] <-tData
-    }
     rm(tData)
   }   
   rm(h,m)
 }   
 
-rm(all) #house cleaning...
+rm(exFile) #keep this clean...
 
-# rm(classlist) 
 classlist <- matrix()
 #this next bit is a hack, but it works in the context of xcms
 for (i in 1:nrow(putDataHere)) {
-  classlist[i] <- paste0(putDataHere$ionMode[i], ".", putDataHere$GoodData[i],'.', 
-                         putDataHere$SampleType[i])
+  classlist[i] <- paste0(putDataHere$ionMode[i], ".", putDataHere$goodData[i])
 }
 rm(i)
+
 
 
 ```
