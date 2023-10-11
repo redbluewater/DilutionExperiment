@@ -1,4 +1,7 @@
 # DilutionExperiment
+**11 October 2023**\
+Update to transfer to _organization_ KujawinskiLaboratory. All prior edits as _user_ KujawinskiLaboratory were Krista Longnecker, whose GitHub name is now @redbluewater
+
 This GitHub repository holds the R code described in Longnecker and Kujawinski (2020). The code analyzes data from a dilution experiment conducted during the DeepDOM cruise in April/May 2013. These files provide details on (1) the peak picking parameters used in XCMS to convert from mzML files into a set of aligned features, and (2) the options selected for the WGCNA analysis that linked the FT-MS data and the TSQ data. WGCNA (Weighted Correlation Network Analysis) is an R package that seeks to find paramters that co-vary and thus may be regulated by similar factors (Langfelder and Horvath, 2008). In this project, we used WGCNA to link untargeted and targeted mass spectrometry data from intracellular organic matter extracted from seawater.
 
 The raw data and experimental metadata are available from MetaboLights: http://www.ebi.ac.uk/metabolights/MTBLS461
